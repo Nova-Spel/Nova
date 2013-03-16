@@ -53,7 +53,7 @@ namespace Nova_Alpha
 
         public void Update(float delta)
         {
-            Vector2 speedtemp = right * delta * speed;
+             Vector2 speedtemp = right * delta * speed;
 
             if (Input.IsGamePadConnected && planet != -1)
             {

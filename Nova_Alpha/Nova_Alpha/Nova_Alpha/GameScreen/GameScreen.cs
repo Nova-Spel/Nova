@@ -10,28 +10,39 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using System.Globalization;
+using System.Diagnostics;
 
 namespace Nova_Alpha
 {
     class GameScreen : Screen
     {
-
         Player player;
-        Planet[] planet;
+        List<Planet> planetList;
         Camera cam;
         HUD hud;
 
         Sprite[,] background;
 
+        ParticleManager particleManager;
+
+        Random random;
+
+        CultureInfo cultureInfo = (CultureInfo)CultureInfo.CurrentCulture.Clone(); //Behövs för att . ska användas som decimaltecken i XML
+
         public GameScreen()
         {
             hud = new HUD();
             player = new Player();
-            planet = new Planet[10];
-            for(uint i=0; i<10; i++)
-            {
-                planet[i] = new Planet();
-            }
+            planetList = new List<Planet>();
+            particleManager = new ParticleManager();
+
+            random = new Random();
+            //planet = new Planet[10];
+            //for(uint i=0; i<10; i++)
+            //{
+            //    planet[i] = new Planet();
+            //}
             cam = new Camera(new Vector2(0));
             background = new Sprite[10, 10];
             for(int i=0; i<10; i++)
@@ -53,13 +64,15 @@ namespace Nova_Alpha
             Collectible[] c = new Collectible[1];
             c[0] = new Collectible();
             c[0].Init(content, new Vector2(700,300));
-            player.Init(content, "atlas_spritesheet", new Vector2(3048, 0));
+            //player.Init(content, "atlas_spritesheet", new Vector2(3048, 0));
+
+            player.Init(content, "atlas_spritesheet", LoadWorld("mapTemplate.xml", content));
 
             
-            for(uint i=0; i<10; i++)
-            {
-                planet[i].Init(content, "isplanet", "", c, new Vector2(3048 + (i * 6096), 3048));
-            }
+            //for(uint i=0; i<10; i++)
+            //{
+            //    planet[i].Init(content, "isplanet", "", c, new Vector2(3048 + (i * 6096), 3048));
+            //}
             for (int i = 0; i < 10; i++)
             {
                 for (int k = 0; k < 10; k++)
@@ -80,10 +93,10 @@ namespace Nova_Alpha
             float length = float.MaxValue;
             player.Planet = -1;
 
-            for (int i = 0; i < planet.Length; i++)
+            for (int i = 0; i < planetList.Count; i++)
             {
-                temppos = player.mSprite.Pos - planet[i].Pos;
-                if (temppos.Length() < planet[i].GravityField)
+                temppos = player.mSprite.Pos - planetList[i].Pos;
+                if (temppos.Length() < planetList[i].GravityField)
                 {
                     player.Planet = i;
                     length = temppos.Length();
@@ -91,7 +104,7 @@ namespace Nova_Alpha
             }
             if (player.Planet != -1)
             {
-                if (length < planet[player.Planet].Radie + 2)
+                if (length < planetList[player.Planet].Radius + 2)
                 {
                     player.CanJump = true;
                 }
@@ -99,16 +112,16 @@ namespace Nova_Alpha
                 {
                     player.CanJump = false;
                 }
-                if (length > planet[player.Planet].Radie)
+                if (length > planetList[player.Planet].Radius)
                 {
                     player.InPlanet = true;
-                    player.Dist = length - planet[player.Planet].Radie;
+                    player.Dist = length - planetList[player.Planet].Radius;
                 }
                 else
                 {
                     player.InPlanet = false;
                 }
-                Vector2 temp = player.mSprite.Pos - planet[player.Planet].Pos;
+                Vector2 temp = player.mSprite.Pos - planetList[player.Planet].Pos;
                 temp.Normalize();
 
                 float angle = Vector2.Dot(temp, new Vector2(0, -1)), tempangle = Vector2.Dot(temp, new Vector2(1, 0));
@@ -128,6 +141,8 @@ namespace Nova_Alpha
             cam.LookAt(player.Pos);
 
             hud.Update(player.Pos, player.Angle);
+
+            particleManager.Update(delta);
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -171,17 +186,19 @@ namespace Nova_Alpha
             }
             if (player.Planet == -1)
             {
-                foreach (Planet x in planet)
+                foreach (Planet x in planetList)
                 {
                     x.Draw(spriteBatch);
                 }
             }
             else
             {
-                planet[player.Planet].Draw(spriteBatch);
+                planetList[player.Planet].Draw(spriteBatch);
             }
             player.Draw(spriteBatch);
             hud.Draw(spriteBatch);
+
+            particleManager.Draw(spriteBatch);
 
             spriteBatch.End();
         }
@@ -189,6 +206,112 @@ namespace Nova_Alpha
         public override void Reset()
         {
 
+        }
+
+        /// <summary>
+        /// Loads the given world
+        /// </summary>
+        /// <param name="fileName">"World to load".xml</param>
+        public Vector2 LoadWorld(string fileName, ContentManager contentManager)
+        {
+            cultureInfo.NumberFormat.CurrencyDecimalSeparator = ".";
+            cultureInfo.NumberFormat.NumberDecimalSeparator = ".";
+
+            XmlDocument file = new XmlDocument();
+            file.Load("Content\\" + fileName);
+
+            //Select all planet-nodes
+            XmlNodeList planets = file.SelectNodes("//planet");
+
+            //Get player spawn and set value to return
+            XmlNode node = file.SelectSingleNode("//playerSpawn");
+
+            Vector2 playerPos = new Vector2(float.Parse(node.ChildNodes.Item(0).InnerText), float.Parse(node.ChildNodes.Item(1).InnerText));
+
+            //Loop through and create all planets
+            foreach (XmlNode currentPlanet in planets)
+            {
+                Planet newPlanet = new Planet();
+
+                newPlanet.Init(contentManager, currentPlanet["texture"].InnerText, "", new Collectible[] { }, ParseVectorFromXML(currentPlanet["position"]), ParseVectorFromXML(currentPlanet["textureSize"]), ParseFloatFromXML(currentPlanet["radius"]), ParseFloatFromXML(currentPlanet["radius"]) + ParseFloatFromXML(currentPlanet["gravitationField"]));
+
+                planetList.Add(newPlanet);
+
+                XmlNodeList emitters = currentPlanet.SelectNodes("//emitter");
+
+                //Loops through all emitters and creates a new one
+                foreach (XmlNode emitter in emitters)
+                {
+                    Particle particle;
+
+                    switch (emitter["type"].InnerText)
+                    {
+                        case "lightbug":
+                            particle = new Lightbug(contentManager.Load<Texture2D>("particles\\lightbug"), random, ParseFloatFromXML(emitter["lifeTime"]), ParseFloatFromXML(emitter["fadeTime"]), newPlanet.Pos, ParseVectorFromXML(emitter["stray"]));
+                            break;
+                        case "leafbrown":
+                            particle = new Leaf(contentManager.Load<Texture2D>("particles\\leafbrown"), random, ParseFloatFromXML(emitter["lifeTime"]), ParseFloatFromXML(emitter["fadeTime"]), newPlanet.Pos, newPlanet.Radius, ParseVectorFromXML(emitter["stray"]), ParseVectorFromXML(emitter["windMin"]), ParseVectorFromXML(emitter["windMax"]), ParseVectorFromXML(emitter["sinRange"]));
+                            break;
+                        case "leafgreen":
+                            particle = new Leaf(contentManager.Load<Texture2D>("particles\\leafgreen"), random, ParseFloatFromXML(emitter["lifeTime"]), ParseFloatFromXML(emitter["fadeTime"]), newPlanet.Pos, newPlanet.Radius, ParseVectorFromXML(emitter["stray"]), ParseVectorFromXML(emitter["windMin"]), ParseVectorFromXML(emitter["windMax"]), ParseVectorFromXML(emitter["sinRange"]));
+                            break;
+                        case "leafred":
+                            particle = new Leaf(contentManager.Load<Texture2D>("particles\\leafred"), random, ParseFloatFromXML(emitter["lifeTime"]), ParseFloatFromXML(emitter["fadeTime"]), newPlanet.Pos, newPlanet.Radius, ParseVectorFromXML(emitter["stray"]), ParseVectorFromXML(emitter["windMin"]), ParseVectorFromXML(emitter["windMax"]), ParseVectorFromXML(emitter["sinRange"]));
+                            break;
+                        default:
+                            throw new Exception("Could not find emitter type! Check spelling and/or implementation");
+                    }
+
+                    //Create new emitter
+                    ParticleEmitter newEmitter = new ParticleEmitter(ParseVectorFromXML(emitter["position"]), particleManager, particle, ParseFloatFromXML(emitter["cooldownTime"]), ParseFloatFromXML(emitter["spawnChance"]), ParseIntFromXML(emitter["maxParticleAmount"]), random);
+
+                    particleManager.AddEmitter(newEmitter);
+                }
+            }
+
+            return playerPos;
+        }
+
+        /// <summary>
+        /// Parses a Vector2 from the given node
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        private Vector2 ParseVectorFromXML(XmlNode node)
+        {
+            return new Vector2(float.Parse(node["x"].InnerText, cultureInfo), float.Parse(node["y"].InnerText, cultureInfo));
+        }
+
+        /// <summary>
+        /// Parses a Point from the given node
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        private Point ParsePointFromXML(XmlNode node)
+        {
+            return new Point(int.Parse(node["x"].InnerText, cultureInfo), int.Parse(node["y"].InnerText, cultureInfo));
+        }
+
+        /// <summary>
+        /// Prases a float from the given node
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        private float ParseFloatFromXML(XmlNode node)
+        {
+            return float.Parse(node.InnerText, cultureInfo);
+        }
+
+        /// <summary>
+        /// Parses an int from the given node
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        private int ParseIntFromXML(XmlNode node)
+        {
+            return int.Parse(node.InnerText, cultureInfo);
         }
     }
 }

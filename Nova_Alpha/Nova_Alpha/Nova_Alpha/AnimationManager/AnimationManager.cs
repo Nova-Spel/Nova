@@ -117,17 +117,7 @@ namespace Nova_Alpha
         /// <param name="gameTime"></param>
         public void Update(GameTime gameTime)
         {
-            if (!frozen)
-            {
-                currentFrameTime += gameTime.ElapsedGameTime.Milliseconds;
-
-                if (currentFrameTime > GetCurrentAnimFrame.frameTime)
-                {
-                    IncreaseFrame();
-
-                    currentFrameTime = 0f;
-                }
-            }
+            Update(gameTime.ElapsedGameTime.Milliseconds);
         }
 
         /// <summary>

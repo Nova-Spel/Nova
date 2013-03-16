@@ -20,7 +20,7 @@ namespace Nova_Alpha
         SpriteEx planet;
         Vector2 pos;
 
-        float gravity, radie, gravityField;
+        float gravity, radius, gravityField;
 
 
         Collectible[] moons;
@@ -33,7 +33,7 @@ namespace Nova_Alpha
             planet = new SpriteEx();
             pos = new Vector2();
             gravity = 0;
-            radie = 2048;
+            radius = 2048;
             gravityField = 3048;
         }
 
@@ -43,10 +43,10 @@ namespace Nova_Alpha
         /// </summary>
         /// <param name="cm">Content</param>
         /// <param name="name">Namn på xml</param>
-        public void Init(ContentManager cm, string p, string g, Collectible[] c, Vector2 pos)
+        public void Init(ContentManager cm, string p, string g, Collectible[] c, Vector2 pos, Vector2 textureSize, float radius, float gravityField)
         {
             this.pos = pos;
-            planet.Init(cm, p, pos, new Rectangle(), new Vector2(1), Color.White, true);
+            planet.Init(cm, p, pos, new Rectangle(), new Vector2(radius * 2 / textureSize.X, radius * 2 / textureSize.Y), Color.White, true);
             if (g != "")
             {
                 grass.Init(cm, g, pos, new Rectangle(), new Vector2(1), Color.White, true);
@@ -57,6 +57,9 @@ namespace Nova_Alpha
             {
                 moons[i] = c[i];
             }
+
+            this.radius = radius;
+            this.gravityField = radius + gravityField;
         }
 
         public void Draw(SpriteBatch sb)
@@ -73,9 +76,9 @@ namespace Nova_Alpha
         {
             get { return pos; }
         }
-        public float Radie
+        public float Radius
         {
-            get { return radie; }
+            get { return radius; }
         }
         public float GravityField
         {

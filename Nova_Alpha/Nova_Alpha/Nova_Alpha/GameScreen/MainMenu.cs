@@ -92,7 +92,7 @@ namespace Nova_Alpha
                 ChangeScreen(new StringEventArgs("Options"));
             else if (buttonPressed == exitButton)
                 ExitGame();
-            else if(buttonPressed == startGameButton)
+            else if (buttonPressed == startGameButton)
                 ChangeScreen(new StringEventArgs("Game"));
         }
     }
