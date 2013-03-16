@@ -127,6 +127,11 @@
     <Compile Include="GameScreen\Buttons\Slider.cs" />
     <Compile Include="GameScreen\Buttons\StringEventArgs.cs" />
     <Compile Include="Input.cs" />
+    <Compile Include="ParticleEmitter.cs" />
+    <Compile Include="ParticleManager\Particle.cs" />
+    <Compile Include="ParticleManager\ParticleManager.cs" />
+    <Compile Include="ParticleManager\Particles\Leaf.cs" />
+    <Compile Include="ParticleManager\Particles\Lightbug.cs" />
     <Compile Include="Planet.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
