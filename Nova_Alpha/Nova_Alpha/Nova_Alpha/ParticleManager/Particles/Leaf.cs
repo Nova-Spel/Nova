@@ -10,20 +10,35 @@ namespace Nova_Alpha
     class Leaf : Particle
     {
         Vector2 planetPosition;
+<<<<<<< HEAD
         float planetRadius;
 
         Vector2 right;
 
+=======
+
+        Vector2 right;
+>>>>>>> origin/David
         Vector2 windStrength;
         Vector2 windMin;
         Vector2 windMax;
 
         Vector2 sinRange;
+<<<<<<< HEAD
         float sinTimer;
         float sinValue;
 
         Vector2 strayDistance;
 
+=======
+
+        Vector2 strayDistance;
+
+        float planetRadius;
+        float sinTimer;
+        float sinValue;
+
+>>>>>>> origin/David
         float rotationSpeed;
 
         bool atRest;
@@ -63,7 +78,11 @@ namespace Nova_Alpha
 
                     right.Normalize();
 
+<<<<<<< HEAD
                     position += velocity * windStrength.Y + (float)Math.Sin(sinTimer) * sinValue * right + windStrength.X * right;
+=======
+                    position += velocity * windStrength.Y + (float)Math.Sin(sinTimer) * right + windStrength.X * right;
+>>>>>>> origin/David
 
                     sinTimer += 0.1f;
 
@@ -85,7 +104,11 @@ namespace Nova_Alpha
             windStrength = new Vector2(windMin.X + (float)random.NextDouble() * (windMax.X - windMin.X), windMin.Y + (float)random.NextDouble() * (windMax.Y - windMin.Y));
 
             rotationSpeed = (float)random.NextDouble() * 0.33f;
+<<<<<<< HEAD
             sinValue = sinRange.X + (float)random.NextDouble() * (sinRange.Y - sinRange.X);
+=======
+            sinValue = sinRange.X + (float)random.NextDouble() * (sinRange.X - sinRange.X);
+>>>>>>> origin/David
         }
 
         public override Particle GetCopy()
