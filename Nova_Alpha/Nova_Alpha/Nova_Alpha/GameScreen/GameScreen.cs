@@ -208,6 +208,7 @@ namespace Nova_Alpha
 
         }
 
+        #region World loading
         /// <summary>
         /// Loads the given world
         /// </summary>
@@ -239,31 +240,70 @@ namespace Nova_Alpha
 
                 XmlNodeList emitters = currentPlanet.SelectNodes("//emitter");
 
+                Dictionary<string, XmlNode> idNodes = new Dictionary<string, XmlNode>();
+
                 //Loops through all emitters and creates a new one
                 foreach (XmlNode emitter in emitters)
                 {
                     Particle particle;
+                    ParticleEmitter newEmitter;
 
-                    switch (emitter["type"].InnerText)
+                    if (emitter.Attributes["id"] != null)
+                        idNodes.Add(emitter.Attributes["id"].Value, emitter);
+
+                    if (emitter.Attributes["copyFrom"] == null)
                     {
-                        case "lightbug":
-                            particle = new Lightbug(contentManager.Load<Texture2D>("particles\\lightbug"), random, ParseFloatFromXML(emitter["lifeTime"]), ParseFloatFromXML(emitter["fadeTime"]), newPlanet.Pos, ParseVectorFromXML(emitter["stray"]));
-                            break;
-                        case "leafbrown":
-                            particle = new Leaf(contentManager.Load<Texture2D>("particles\\leafbrown"), random, ParseFloatFromXML(emitter["lifeTime"]), ParseFloatFromXML(emitter["fadeTime"]), newPlanet.Pos, newPlanet.Radius, ParseVectorFromXML(emitter["stray"]), ParseVectorFromXML(emitter["windMin"]), ParseVectorFromXML(emitter["windMax"]), ParseVectorFromXML(emitter["sinRange"]));
-                            break;
-                        case "leafgreen":
-                            particle = new Leaf(contentManager.Load<Texture2D>("particles\\leafgreen"), random, ParseFloatFromXML(emitter["lifeTime"]), ParseFloatFromXML(emitter["fadeTime"]), newPlanet.Pos, newPlanet.Radius, ParseVectorFromXML(emitter["stray"]), ParseVectorFromXML(emitter["windMin"]), ParseVectorFromXML(emitter["windMax"]), ParseVectorFromXML(emitter["sinRange"]));
-                            break;
-                        case "leafred":
-                            particle = new Leaf(contentManager.Load<Texture2D>("particles\\leafred"), random, ParseFloatFromXML(emitter["lifeTime"]), ParseFloatFromXML(emitter["fadeTime"]), newPlanet.Pos, newPlanet.Radius, ParseVectorFromXML(emitter["stray"]), ParseVectorFromXML(emitter["windMin"]), ParseVectorFromXML(emitter["windMax"]), ParseVectorFromXML(emitter["sinRange"]));
-                            break;
-                        default:
-                            throw new Exception("Could not find emitter type! Check spelling and/or implementation");
-                    }
+                        switch (emitter["type"].InnerText)
+                        {
+                            case "lightbug":
+                                particle = new Lightbug(contentManager.Load<Texture2D>("particles\\lightbug"), random, ParseFloatFromXML(emitter["lifeTime"]), ParseFloatFromXML(emitter["fadeTime"]), newPlanet.Pos, ParseFloatFromXML(emitter["strayDistance"]));
+                                break;
+                            case "leafbrown":
+                                particle = new Leaf(contentManager.Load<Texture2D>("particles\\leafbrown"), random, ParseFloatFromXML(emitter["lifeTime"]), ParseFloatFromXML(emitter["fadeTime"]), newPlanet.Pos, newPlanet.Radius, ParseVectorFromXML(emitter["stray"]), ParseVectorFromXML(emitter["windMin"]), ParseVectorFromXML(emitter["windMax"]), ParseVectorFromXML(emitter["sinRange"]));
+                                break;
+                            case "leafgreen":
+                                particle = new Leaf(contentManager.Load<Texture2D>("particles\\leafgreen"), random, ParseFloatFromXML(emitter["lifeTime"]), ParseFloatFromXML(emitter["fadeTime"]), newPlanet.Pos, newPlanet.Radius, ParseVectorFromXML(emitter["stray"]), ParseVectorFromXML(emitter["windMin"]), ParseVectorFromXML(emitter["windMax"]), ParseVectorFromXML(emitter["sinRange"]));
+                                break;
+                            case "leafred":
+                                particle = new Leaf(contentManager.Load<Texture2D>("particles\\leafred"), random, ParseFloatFromXML(emitter["lifeTime"]), ParseFloatFromXML(emitter["fadeTime"]), newPlanet.Pos, newPlanet.Radius, ParseVectorFromXML(emitter["stray"]), ParseVectorFromXML(emitter["windMin"]), ParseVectorFromXML(emitter["windMax"]), ParseVectorFromXML(emitter["sinRange"]));
+                                break;
+                            default:
+                                throw new Exception("Could not find emitter type! Check spelling and/or implementation");
+                        }
 
-                    //Create new emitter
-                    ParticleEmitter newEmitter = new ParticleEmitter(ParseVectorFromXML(emitter["position"]), particleManager, particle, ParseFloatFromXML(emitter["cooldownTime"]), ParseFloatFromXML(emitter["spawnChance"]), ParseIntFromXML(emitter["maxParticleAmount"]), random);
+                        //Create new emitter
+                        newEmitter = new ParticleEmitter(ParseVectorFromXML(emitter["position"]), particleManager, particle, ParseFloatFromXML(emitter["cooldownTime"]), ParseFloatFromXML(emitter["spawnChance"]), ParseIntFromXML(emitter["maxParticleAmount"]), random);
+
+                    }
+                    else
+                    {
+                        XmlNode copyNode = idNodes[emitter.Attributes["copyFrom"].Value];
+
+                        switch (emitter["type"].InnerText)
+                        {
+                            case "lightbug":
+                                particle = new Lightbug(contentManager.Load<Texture2D>("particles\\lightbug"), random, ParseFloatFromXML(copyNode["lifeTime"]), ParseFloatFromXML(copyNode["fadeTime"]), newPlanet.Pos, ParseFloatFromXML(copyNode["strayDistance"]));
+                                break;
+                            case "leafbrown":
+                                particle = new Leaf(contentManager.Load<Texture2D>("particles\\leafbrown"), random, ParseFloatFromXML(copyNode["lifeTime"]), ParseFloatFromXML(copyNode["fadeTime"]), newPlanet.Pos, newPlanet.Radius, ParseVectorFromXML(copyNode["stray"]), ParseVectorFromXML(copyNode["windMin"]), ParseVectorFromXML(copyNode["windMax"]), ParseVectorFromXML(copyNode["sinRange"]));
+                                break;
+                            case "leafgreen":
+                                particle = new Leaf(contentManager.Load<Texture2D>("particles\\leafgreen"), random, ParseFloatFromXML(copyNode["lifeTime"]), ParseFloatFromXML(copyNode["fadeTime"]), newPlanet.Pos, newPlanet.Radius, ParseVectorFromXML(copyNode["stray"]), ParseVectorFromXML(copyNode["windMin"]), ParseVectorFromXML(copyNode["windMax"]), ParseVectorFromXML(copyNode["sinRange"]));
+                                break;
+                            case "leafred":
+                                particle = new Leaf(contentManager.Load<Texture2D>("particles\\leafred"), random, ParseFloatFromXML(copyNode["lifeTime"]), ParseFloatFromXML(copyNode["fadeTime"]), newPlanet.Pos, newPlanet.Radius, ParseVectorFromXML(copyNode["stray"]), ParseVectorFromXML(copyNode["windMin"]), ParseVectorFromXML(copyNode["windMax"]), ParseVectorFromXML(copyNode["sinRange"]));
+                                break;
+                            default:
+                                throw new Exception("Could not find emitter type! Check spelling and/or implementation");
+
+
+                        }
+
+                        //Create new emitter
+                        newEmitter = new ParticleEmitter(ParseVectorFromXML(copyNode["position"]), particleManager, particle, ParseFloatFromXML(copyNode["cooldownTime"]), ParseFloatFromXML(copyNode["spawnChance"]), ParseIntFromXML(copyNode["maxParticleAmount"]), random);
+                    }
+                    
+
 
                     particleManager.AddEmitter(newEmitter);
                 }
@@ -313,5 +353,6 @@ namespace Nova_Alpha
         {
             return int.Parse(node.InnerText, cultureInfo);
         }
+        #endregion
     }
 }
