@@ -220,7 +220,6 @@ namespace Nova_Alpha
 
             XmlDocument file = new XmlDocument();
             file.Load("Content\\" + fileName);
-
             //Select all planet-nodes
             XmlNodeList planets = file.SelectNodes("//planet");
 
@@ -340,7 +339,9 @@ namespace Nova_Alpha
         /// <returns></returns>
         private float ParseFloatFromXML(XmlNode node)
         {
-            return float.Parse(node.InnerText, cultureInfo);
+            if(node != null)
+                return float.Parse(node.InnerText, cultureInfo);
+            return 0.0f;
         }
 
         /// <summary>

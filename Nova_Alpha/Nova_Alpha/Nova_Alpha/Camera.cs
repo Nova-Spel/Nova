@@ -8,7 +8,7 @@ namespace Nova_Alpha
 {
     class Camera
     {
-        public Vector2 position, targetPosition, up, right;
+        public Vector2 position, up, right;
         public float rotation;
         public float zoom;
 
@@ -19,6 +19,7 @@ namespace Nova_Alpha
             this.position = position;
             up = new Vector2(0, -1);
             right = new Vector2(1, 0);
+            zoom = 1;
         }
 
         public void LookAt(Vector2 position)
@@ -28,7 +29,7 @@ namespace Nova_Alpha
 
         public Matrix GetViewMatrix()
         {
-            return Matrix.CreateTranslation(new Vector3(-position, 0.0f)) * Matrix.CreateRotationZ(-rotation);
+            return Matrix.CreateTranslation(new Vector3(-position, 0.0f)) * Matrix.CreateRotationZ(-rotation) * Matrix.CreateScale(zoom);
         }
     }
 }

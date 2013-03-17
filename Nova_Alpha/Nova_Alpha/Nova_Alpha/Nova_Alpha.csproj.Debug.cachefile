@@ -22,11 +22,6 @@ Content\OptionsMenu\musicbg.xnb
 Content\Background.xnb
 Content\isplanet.xnb
 Content\HUD.xnb
-Content\Ariel.xnb
-Content\Shanti.xnb
-Content\MainMenu\Music\Background.xnb
-Content\Sounds\ChangeScreen.xnb
-Content\Sounds\Click.xnb
 Content\Particles\eldloppa.xnb
 Content\Particles\lightbug.xnb
 Content\Particles\sand.xnb
@@ -37,4 +32,9 @@ Content\Particles\leafred.xnb
 Content\fireplanet.xnb
 Content\grasplanet.xnb
 Content\iceplanet.xnb
+Content\Ariel.xnb
+Content\Shanti.xnb
+Content\MainMenu\Music\Background.xnb
+Content\Sounds\ChangeScreen.xnb
+Content\Sounds\Click.xnb
 Content\MainMenu\Music\Background.wma
