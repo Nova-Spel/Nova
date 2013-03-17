@@ -21,7 +21,7 @@ namespace Nova_Alpha
 
         Vector2 oldTargetPosition;
 
-        Vector2 strayDistance;
+        float strayDistance;
 
         Vector2 right;
         Vector2 planetPosition;
@@ -31,13 +31,14 @@ namespace Nova_Alpha
         float yLerpTimer;
         float yLerpTimerInc;
 
-        public Lightbug(Texture2D texture, Random random, float lifeTime, float fadeTime, Vector2 planetPosition, Vector2 strayDistance)
+        public Lightbug(Texture2D texture, Random random, float lifeTime, float fadeTime, Vector2 planetPosition, float strayDistance)
             : base(texture, random, lifeTime, fadeTime)
         {
             this.strayDistance = strayDistance;
             this.planetPosition = planetPosition;
 
-            position = new Vector2((float)random.NextDouble() * strayDistance.X * GetPosOrNegValue(), (float)random.NextDouble() * strayDistance.Y * GetPosOrNegValue());
+            //position = new Vector2((float)random.NextDouble() * strayDistance.X * GetPosOrNegValue(), (float)random.NextDouble() * strayDistance.Y * GetPosOrNegValue());
+            position = new Vector2((float)random.NextDouble() * strayDistance * GetPosOrNegValue(), (float)random.NextDouble() * strayDistance * GetPosOrNegValue());
 
             xTimerInc = (float)random.NextDouble() * 0.08f;
             yTimerInc = (float)random.NextDouble() * 0.08f;
@@ -78,7 +79,7 @@ namespace Nova_Alpha
             if (xLerpTimer == 1.0f && yLerpTimer == 1.0f)
             {
                 oldTargetPosition = targetPosition;
-                targetPosition = new Vector2(startingPosition.X + (float)random.NextDouble() * strayDistance.X * GetPosOrNegValue(), startingPosition.Y + (float)random.NextDouble() * strayDistance.Y * GetPosOrNegValue());
+                targetPosition = new Vector2(startingPosition.X + (float)random.NextDouble() * strayDistance * GetPosOrNegValue(), startingPosition.Y + (float)random.NextDouble() * strayDistance * GetPosOrNegValue());
 
                 xLerpTimer = 0.0f;
                 yLerpTimer = 0.0f;
